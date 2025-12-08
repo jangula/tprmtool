@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Assessment - <%= vendor.vendor_name %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .form-section { background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .form-section h5 { color: #1e3a5f; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+    .risk-score-btn { width: 100%; padding: 0.5rem; border: 2px solid #e2e8f0; background: white; border-radius: 8px; transition: all 0.2s; }
+    .risk-score-btn:hover { border-color: #2563eb; }
+    .risk-score-btn.selected { border-color: #2563eb; background: #eff6ff; }
+    .risk-score-btn input { display: none; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'vendors' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Risk Assessment</h4>
+        <small class="text-muted">Step 2 of TPRM Lifecycle - <%= vendor.vendor_name %></small>
+      </div>
+      <a href="/vendors/<%= vendor.id %>" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Vendor
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" action="/assessment/<%= vendor.id %>">
+
+          <!-- Data Classification -->
+          <div class="form-section">
+            <h5><i class="bi bi-database me-2"></i>Data Classification</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Data Classification Level *</label>
+                <select name="data_classification" class="form-select" required>
+                  <option value="">Select...</option>
+                  <option value="public" <%= assessment && assessment.data_classification === 'public' ? 'selected' : '' %>>Public</option>
+                  <option value="internal" <%= assessment && assessment.data_classification === 'internal' ? 'selected' : '' %>>Internal</option>
+                  <option value="confidential" <%= assessment && assessment.data_classification === 'confidential' ? 'selected' : '' %>>Confidential</option>
+                  <option value="restricted" <%= assessment && assessment.data_classification === 'restricted' ? 'selected' : '' %>>Highly Confidential / Restricted</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Data Types Accessed</label>
+                <select name="data_types" class="form-select" multiple size="4">
+                  <option value="pii">Personally Identifiable Information (PII)</option>
+                  <option value="phi">Protected Health Information (PHI)</option>
+                  <option value="pci">Payment Card Data (PCI)</option>
+                  <option value="financial">Financial Data</option>
+                  <option value="employee">Employee Data</option>
+                  <option value="customer">Customer Data</option>
+                  <option value="ip">Intellectual Property</option>
+                </select>
+                <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inherent Risk Scoring -->
+          <div class="form-section">
+            <h5><i class="bi bi-speedometer2 me-2"></i>Inherent Risk Scoring</h5>
+            <p class="text-muted mb-4">Rate each factor from 1 (Low) to 4 (Critical)</p>
+
+            <!-- Business Impact -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Business Impact if Unavailable</label>
+              <div class="row g-2">
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.business_impact == 1 ? 'selected' : '' %>">
+                    <input type="radio" name="business_impact" value="1" <%= assessment && assessment.business_impact == 1 ? 'checked' : '' %> required>
+                    <div class="text-center">
+                      <strong class="text-success">1</strong><br>
+                      <small>Minimal disruption</small>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.business_impact == 2 ? 'selected' : '' %>">
+                    <input type="radio" name="business_impact" value="2" <%= assessment && assessment.business_impact == 2 ? 'checked' : '' %>>
+                    <div class="text-center">
+                      <strong class="text-warning">2</strong><br>
+                      <small>Some disruption</small>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.business_impact == 3 ? 'selected' : '' %>">
+                    <input type="radio" name="business_impact" value="3" <%= assessment && assessment.business_impact == 3 ? 'checked' : '' %>>
+                    <div class="text-center">
+                      <strong class="text-orange" style="color: #ea580c;">3</strong><br>
+                      <small>Significant disruption</small>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.business_impact == 4 ? 'selected' : '' %>">
+                    <input type="radio" name="business_impact" value="4" <%= assessment && assessment.business_impact == 4 ? 'checked' : '' %>>
+                    <div class="text-center">
+                      <strong class="text-danger">4</strong><br>
+                      <small>Severe/Catastrophic</small>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Data Sensitivity -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Data Sensitivity</label>
+              <div class="row g-2">
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.data_sensitivity == 1 ? 'selected' : '' %>">
+                    <input type="radio" name="data_sensitivity" value="1" <%= assessment && assessment.data_sensitivity == 1 ? 'checked' : '' %> required>
+                    <div class="text-center"><strong class="text-success">1</strong><br><small>Public only</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.data_sensitivity == 2 ? 'selected' : '' %>">
+                    <input type="radio" name="data_sensitivity" value="2" <%= assessment && assessment.data_sensitivity == 2 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-warning">2</strong><br><small>Internal</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.data_sensitivity == 3 ? 'selected' : '' %>">
+                    <input type="radio" name="data_sensitivity" value="3" <%= assessment && assessment.data_sensitivity == 3 ? 'checked' : '' %>>
+                    <div class="text-center"><strong style="color: #ea580c;">3</strong><br><small>Confidential</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.data_sensitivity == 4 ? 'selected' : '' %>">
+                    <input type="radio" name="data_sensitivity" value="4" <%= assessment && assessment.data_sensitivity == 4 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-danger">4</strong><br><small>Highly Restricted</small></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Access Level -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">System Access Level</label>
+              <div class="row g-2">
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.system_access == 1 ? 'selected' : '' %>">
+                    <input type="radio" name="system_access" value="1" <%= assessment && assessment.system_access == 1 ? 'checked' : '' %> required>
+                    <div class="text-center"><strong class="text-success">1</strong><br><small>No access</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.system_access == 2 ? 'selected' : '' %>">
+                    <input type="radio" name="system_access" value="2" <%= assessment && assessment.system_access == 2 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-warning">2</strong><br><small>View only</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.system_access == 3 ? 'selected' : '' %>">
+                    <input type="radio" name="system_access" value="3" <%= assessment && assessment.system_access == 3 ? 'checked' : '' %>>
+                    <div class="text-center"><strong style="color: #ea580c;">3</strong><br><small>Modify</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.system_access == 4 ? 'selected' : '' %>">
+                    <input type="radio" name="system_access" value="4" <%= assessment && assessment.system_access == 4 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-danger">4</strong><br><small>Admin/Full</small></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Integration Depth -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Integration Depth</label>
+              <div class="row g-2">
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.integration_depth == 1 ? 'selected' : '' %>">
+                    <input type="radio" name="integration_depth" value="1" <%= assessment && assessment.integration_depth == 1 ? 'checked' : '' %> required>
+                    <div class="text-center"><strong class="text-success">1</strong><br><small>Standalone</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.integration_depth == 2 ? 'selected' : '' %>">
+                    <input type="radio" name="integration_depth" value="2" <%= assessment && assessment.integration_depth == 2 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-warning">2</strong><br><small>Limited API</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.integration_depth == 3 ? 'selected' : '' %>">
+                    <input type="radio" name="integration_depth" value="3" <%= assessment && assessment.integration_depth == 3 ? 'checked' : '' %>>
+                    <div class="text-center"><strong style="color: #ea580c;">3</strong><br><small>Significant</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.integration_depth == 4 ? 'selected' : '' %>">
+                    <input type="radio" name="integration_depth" value="4" <%= assessment && assessment.integration_depth == 4 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-danger">4</strong><br><small>Core System</small></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Replacement Difficulty -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Replacement Difficulty</label>
+              <div class="row g-2">
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.replacement_difficulty == 1 ? 'selected' : '' %>">
+                    <input type="radio" name="replacement_difficulty" value="1" <%= assessment && assessment.replacement_difficulty == 1 ? 'checked' : '' %> required>
+                    <div class="text-center"><strong class="text-success">1</strong><br><small>Easy</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.replacement_difficulty == 2 ? 'selected' : '' %>">
+                    <input type="radio" name="replacement_difficulty" value="2" <%= assessment && assessment.replacement_difficulty == 2 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-warning">2</strong><br><small>Moderate</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.replacement_difficulty == 3 ? 'selected' : '' %>">
+                    <input type="radio" name="replacement_difficulty" value="3" <%= assessment && assessment.replacement_difficulty == 3 ? 'checked' : '' %>>
+                    <div class="text-center"><strong style="color: #ea580c;">3</strong><br><small>Difficult</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.replacement_difficulty == 4 ? 'selected' : '' %>">
+                    <input type="radio" name="replacement_difficulty" value="4" <%= assessment && assessment.replacement_difficulty == 4 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-danger">4</strong><br><small>Very Difficult</small></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Regulatory Exposure -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Regulatory Exposure</label>
+              <div class="row g-2">
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.regulatory_exposure == 1 ? 'selected' : '' %>">
+                    <input type="radio" name="regulatory_exposure" value="1" <%= assessment && assessment.regulatory_exposure == 1 ? 'checked' : '' %> required>
+                    <div class="text-center"><strong class="text-success">1</strong><br><small>None</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.regulatory_exposure == 2 ? 'selected' : '' %>">
+                    <input type="radio" name="regulatory_exposure" value="2" <%= assessment && assessment.regulatory_exposure == 2 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-warning">2</strong><br><small>Low</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.regulatory_exposure == 3 ? 'selected' : '' %>">
+                    <input type="radio" name="regulatory_exposure" value="3" <%= assessment && assessment.regulatory_exposure == 3 ? 'checked' : '' %>>
+                    <div class="text-center"><strong style="color: #ea580c;">3</strong><br><small>Moderate</small></div>
+                  </label>
+                </div>
+                <div class="col-3">
+                  <label class="risk-score-btn <%= assessment && assessment.regulatory_exposure == 4 ? 'selected' : '' %>">
+                    <input type="radio" name="regulatory_exposure" value="4" <%= assessment && assessment.regulatory_exposure == 4 ? 'checked' : '' %>>
+                    <div class="text-center"><strong class="text-danger">4</strong><br><small>High</small></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domain Risk Ratings -->
+          <div class="form-section">
+            <h5><i class="bi bi-pie-chart me-2"></i>Risk Domain Ratings</h5>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Financial Risk</label>
+                <select name="financial_risk" class="form-select">
+                  <option value="low" <%= assessment && assessment.financial_risk === 'low' ? 'selected' : '' %>>Low</option>
+                  <option value="medium" <%= assessment && assessment.financial_risk === 'medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="high" <%= assessment && assessment.financial_risk === 'high' ? 'selected' : '' %>>High</option>
+                  <option value="critical" <%= assessment && assessment.financial_risk === 'critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Operational Risk</label>
+                <select name="operational_risk" class="form-select">
+                  <option value="low" <%= assessment && assessment.operational_risk === 'low' ? 'selected' : '' %>>Low</option>
+                  <option value="medium" <%= assessment && assessment.operational_risk === 'medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="high" <%= assessment && assessment.operational_risk === 'high' ? 'selected' : '' %>>High</option>
+                  <option value="critical" <%= assessment && assessment.operational_risk === 'critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Security Risk</label>
+                <select name="security_risk" class="form-select">
+                  <option value="low" <%= assessment && assessment.security_risk === 'low' ? 'selected' : '' %>>Low</option>
+                  <option value="medium" <%= assessment && assessment.security_risk === 'medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="high" <%= assessment && assessment.security_risk === 'high' ? 'selected' : '' %>>High</option>
+                  <option value="critical" <%= assessment && assessment.security_risk === 'critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Compliance Risk</label>
+                <select name="compliance_risk" class="form-select">
+                  <option value="low" <%= assessment && assessment.compliance_risk === 'low' ? 'selected' : '' %>>Low</option>
+                  <option value="medium" <%= assessment && assessment.compliance_risk === 'medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="high" <%= assessment && assessment.compliance_risk === 'high' ? 'selected' : '' %>>High</option>
+                  <option value="critical" <%= assessment && assessment.compliance_risk === 'critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Reputational Risk</label>
+                <select name="reputational_risk" class="form-select">
+                  <option value="low" <%= assessment && assessment.reputational_risk === 'low' ? 'selected' : '' %>>Low</option>
+                  <option value="medium" <%= assessment && assessment.reputational_risk === 'medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="high" <%= assessment && assessment.reputational_risk === 'high' ? 'selected' : '' %>>High</option>
+                  <option value="critical" <%= assessment && assessment.reputational_risk === 'critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Strategic Risk</label>
+                <select name="strategic_risk" class="form-select">
+                  <option value="low" <%= assessment && assessment.strategic_risk === 'low' ? 'selected' : '' %>>Low</option>
+                  <option value="medium" <%= assessment && assessment.strategic_risk === 'medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="high" <%= assessment && assessment.strategic_risk === 'high' ? 'selected' : '' %>>High</option>
+                  <option value="critical" <%= assessment && assessment.strategic_risk === 'critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendation -->
+          <div class="form-section">
+            <h5><i class="bi bi-chat-square-text me-2"></i>Recommendation & Notes</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Recommendation</label>
+                <select name="recommendation" class="form-select">
+                  <option value="approve" <%= assessment && assessment.recommendation === 'approve' ? 'selected' : '' %>>Approve - Meets risk tolerance</option>
+                  <option value="approve_conditions" <%= assessment && assessment.recommendation === 'approve_conditions' ? 'selected' : '' %>>Approve with Conditions</option>
+                  <option value="defer" <%= assessment && assessment.recommendation === 'defer' ? 'selected' : '' %>>Defer - Requires more review</option>
+                  <option value="reject" <%= assessment && assessment.recommendation === 'reject' ? 'selected' : '' %>>Reject - Does not meet tolerance</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Notes / Justification</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Add any notes or justification for the assessment..."><%= assessment ? assessment.notes : '' %></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/vendors/<%= vendor.id %>" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-check-lg me-2"></i>Complete Assessment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Add selected class to radio buttons
+    document.querySelectorAll('.risk-score-btn input').forEach(input => {
+      input.addEventListener('change', function() {
+        this.closest('.row').querySelectorAll('.risk-score-btn').forEach(btn => btn.classList.remove('selected'));
+        this.closest('.risk-score-btn').classList.add('selected');
+      });
+    });
+  </script>
+<%- include("../partials/footer") %>
+</body>
+</html>

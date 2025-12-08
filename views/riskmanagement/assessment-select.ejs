@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Vendor - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .card-header { background: white; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .vendor-card { transition: all 0.2s; cursor: pointer; }
+    .vendor-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-color: #3b82f6; }
+    .vendor-card.selected { border: 2px solid #3b82f6; background-color: #eff6ff; }
+    .badge-critical { background-color: #dc2626; }
+    .badge-high { background-color: #ea580c; }
+    .badge-medium { background-color: #ca8a04; }
+    .badge-low { background-color: #16a34a; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'riskmanagement' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <% if (assessmentType === 'risk') { %>
+          <h4 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Risk Assessment</h4>
+          <small class="text-muted">Select a vendor to conduct risk assessment</small>
+        <% } else if (assessmentType === 'questionnaire') { %>
+          <h4 class="mb-0"><i class="bi bi-file-earmark-check me-2"></i>Security Questionnaire</h4>
+          <small class="text-muted">Select a vendor to complete security questionnaire</small>
+        <% } else if (assessmentType === 'data-processing') { %>
+          <h4 class="mb-0"><i class="bi bi-database-check me-2"></i>Data Processing Assessment</h4>
+          <small class="text-muted">Select a vendor to assess data processing practices</small>
+        <% } else if (assessmentType === 'soc2') { %>
+          <h4 class="mb-0"><i class="bi bi-award me-2"></i>SOC 2 Review</h4>
+          <small class="text-muted">Select a vendor to review SOC 2 report</small>
+        <% } else if (assessmentType === 'ai-risk') { %>
+          <h4 class="mb-0"><i class="bi bi-robot me-2"></i>AI Risk Assessment</h4>
+          <small class="text-muted">Select a vendor to assess AI/ML system risks</small>
+        <% } %>
+      </div>
+      <a href="/risk-management" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back
+      </a>
+    </div>
+
+    <% if (vendors.length > 0) { %>
+      <!-- Search -->
+      <div class="card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" id="vendorSearch" placeholder="Search vendors...">
+              </div>
+            </div>
+            <div class="col-md-6 text-md-end mt-2 mt-md-0">
+              <span class="text-muted"><%= vendors.length %> vendors available</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendor Grid -->
+      <div class="row g-3" id="vendorGrid">
+        <% vendors.forEach(vendor => { %>
+          <div class="col-md-6 col-lg-4 vendor-item" data-name="<%= vendor.vendor_name.toLowerCase() %>">
+            <div class="card vendor-card h-100" onclick="selectVendor(<%= vendor.id %>, '<%= assessmentType %>')">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h5 class="card-title mb-0"><%= vendor.vendor_name %></h5>
+                  <span class="badge bg-<%= vendor.status === 'active' ? 'success' : vendor.status === 'pending' ? 'warning' : 'secondary' %>">
+                    <%= vendor.status %>
+                  </span>
+                </div>
+                <p class="card-text text-muted small mb-2">
+                  <%= vendor.service_description ? vendor.service_description.substring(0, 80) + (vendor.service_description.length > 80 ? '...' : '') : 'No description' %>
+                </p>
+                <div class="d-flex gap-2 flex-wrap">
+                  <% if (vendor.risk_tier) { %>
+                    <span class="badge badge-<%= vendor.risk_tier %>"><%= vendor.risk_tier.toUpperCase() %> Risk</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Not Assessed</span>
+                  <% } %>
+                  <% if (vendor.vendor_email) { %>
+                    <span class="badge bg-light text-dark"><i class="bi bi-envelope me-1"></i><%= vendor.vendor_email %></span>
+                  <% } %>
+                </div>
+              </div>
+              <div class="card-footer bg-transparent border-0 pt-0">
+                <small class="text-muted">
+                  <i class="bi bi-calendar me-1"></i>Onboarded: <%= new Date(vendor.created_at).toLocaleDateString() %>
+                </small>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-building display-1 text-muted mb-3"></i>
+          <h4>No Vendors Found</h4>
+          <p class="text-muted">You need to onboard vendors before conducting assessments.</p>
+          <a href="/vendors/new" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Onboard Vendor
+          </a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Search functionality
+    document.getElementById('vendorSearch')?.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      document.querySelectorAll('.vendor-item').forEach(item => {
+        const name = item.dataset.name;
+        item.style.display = name.includes(searchTerm) ? 'block' : 'none';
+      });
+    });
+
+    // Navigate to assessment form
+    function selectVendor(vendorId, type) {
+      let url = '';
+      switch(type) {
+        case 'risk':
+          url = `/assessment/${vendorId}`;
+          break;
+        case 'questionnaire':
+          url = `/questionnaire/${vendorId}`;
+          break;
+        case 'data-processing':
+          url = `/data-processing/${vendorId}`;
+          break;
+        case 'soc2':
+          url = `/soc2/${vendorId}`;
+          break;
+        case 'ai-risk':
+          url = `/ai-risk/${vendorId}`;
+          break;
+      }
+      window.location.href = url;
+    }
+  </script>
+<%- include("../partials/footer") %>
+</body>
+</html>

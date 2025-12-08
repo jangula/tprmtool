@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Questionnaire - <%= vendor.vendor_name %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .form-section { background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .form-section h5 { color: #1e3a5f; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+    .question-row { padding: 1rem; background: white; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .question-row:hover { background: #f1f5f9; }
+    .btn-group-toggle .btn { min-width: 60px; }
+    .btn-check:checked + .btn-outline-success { background-color: #16a34a; border-color: #16a34a; color: white; }
+    .btn-check:checked + .btn-outline-danger { background-color: #dc2626; border-color: #dc2626; color: white; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'vendors' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Security Questionnaire</h4>
+        <small class="text-muted">Step 3 of TPRM Lifecycle - <%= vendor.vendor_name %></small>
+      </div>
+      <a href="/vendors/<%= vendor.id %>" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Vendor
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" action="/questionnaire/<%= vendor.id %>">
+
+          <!-- Security Program -->
+          <div class="form-section">
+            <h5><i class="bi bi-shield-check me-2"></i>Security Program & Governance</h5>
+
+            <div class="question-row">
+              <div>
+                <strong>Documented Security Policy</strong><br>
+                <small class="text-muted">Does the vendor have a formally documented information security policy?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_security_policy" value="yes" id="sec_policy_yes" <%= questionnaire && questionnaire.has_security_policy === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="sec_policy_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_security_policy" value="no" id="sec_policy_no" <%= questionnaire && questionnaire.has_security_policy === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="sec_policy_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Designated CISO</strong><br>
+                <small class="text-muted">Is there a designated Chief Information Security Officer or equivalent?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_ciso" value="yes" id="ciso_yes" <%= questionnaire && questionnaire.has_ciso === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="ciso_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_ciso" value="no" id="ciso_no" <%= questionnaire && questionnaire.has_ciso === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="ciso_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Risk Management Program</strong><br>
+                <small class="text-muted">Does the vendor have a formal risk management program?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_risk_management" value="yes" id="risk_mgmt_yes" <%= questionnaire && questionnaire.has_risk_management === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="risk_mgmt_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_risk_management" value="no" id="risk_mgmt_no" <%= questionnaire && questionnaire.has_risk_management === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="risk_mgmt_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certifications -->
+          <div class="form-section">
+            <h5><i class="bi bi-award me-2"></i>Certifications & Compliance</h5>
+
+            <div class="question-row">
+              <div>
+                <strong>SOC 2 Certification</strong><br>
+                <small class="text-muted">Does the vendor have a current SOC 2 Type II report?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_soc2" value="yes" id="soc2_yes" <%= questionnaire && questionnaire.has_soc2 === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="soc2_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_soc2" value="no" id="soc2_no" <%= questionnaire && questionnaire.has_soc2 === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="soc2_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>ISO 27001 Certification</strong><br>
+                <small class="text-muted">Is the vendor ISO 27001 certified?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_iso27001" value="yes" id="iso_yes" <%= questionnaire && questionnaire.has_iso27001 === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="iso_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_iso27001" value="no" id="iso_no" <%= questionnaire && questionnaire.has_iso27001 === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="iso_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Penetration Testing</strong><br>
+                <small class="text-muted">Are penetration tests conducted at least annually by third parties?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_pentest" value="yes" id="pentest_yes" <%= questionnaire && questionnaire.has_pentest === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="pentest_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_pentest" value="no" id="pentest_no" <%= questionnaire && questionnaire.has_pentest === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="pentest_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Access Control -->
+          <div class="form-section">
+            <h5><i class="bi bi-key me-2"></i>Access Control</h5>
+
+            <div class="question-row">
+              <div>
+                <strong>Multi-Factor Authentication</strong><br>
+                <small class="text-muted">Is MFA required for all system and remote access?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_mfa" value="yes" id="mfa_yes" <%= questionnaire && questionnaire.has_mfa === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="mfa_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_mfa" value="no" id="mfa_no" <%= questionnaire && questionnaire.has_mfa === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="mfa_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Role-Based Access Control</strong><br>
+                <small class="text-muted">Is role-based access control (RBAC) implemented?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_rbac" value="yes" id="rbac_yes" <%= questionnaire && questionnaire.has_rbac === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="rbac_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_rbac" value="no" id="rbac_no" <%= questionnaire && questionnaire.has_rbac === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="rbac_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Access Reviews</strong><br>
+                <small class="text-muted">Are access rights reviewed at least quarterly?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_access_reviews" value="yes" id="access_rev_yes" <%= questionnaire && questionnaire.has_access_reviews === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="access_rev_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_access_reviews" value="no" id="access_rev_no" <%= questionnaire && questionnaire.has_access_reviews === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="access_rev_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Protection -->
+          <div class="form-section">
+            <h5><i class="bi bi-lock me-2"></i>Data Protection</h5>
+
+            <div class="question-row">
+              <div>
+                <strong>Encryption at Rest</strong><br>
+                <small class="text-muted">Is data encrypted at rest using industry-standard encryption?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="encryption_at_rest" value="yes" id="enc_rest_yes" <%= questionnaire && questionnaire.encryption_at_rest === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="enc_rest_yes">Yes</label>
+                <input type="radio" class="btn-check" name="encryption_at_rest" value="no" id="enc_rest_no" <%= questionnaire && questionnaire.encryption_at_rest === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="enc_rest_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Encryption in Transit</strong><br>
+                <small class="text-muted">Is data encrypted in transit (TLS 1.2 or higher)?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="encryption_in_transit" value="yes" id="enc_transit_yes" <%= questionnaire && questionnaire.encryption_in_transit === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="enc_transit_yes">Yes</label>
+                <input type="radio" class="btn-check" name="encryption_in_transit" value="no" id="enc_transit_no" <%= questionnaire && questionnaire.encryption_in_transit === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="enc_transit_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Data Retention Policy</strong><br>
+                <small class="text-muted">Is there a formal data retention and disposal policy?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="data_retention_policy" value="yes" id="retention_yes" <%= questionnaire && questionnaire.data_retention_policy === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="retention_yes">Yes</label>
+                <input type="radio" class="btn-check" name="data_retention_policy" value="no" id="retention_no" <%= questionnaire && questionnaire.data_retention_policy === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="retention_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Incident Response & BC/DR -->
+          <div class="form-section">
+            <h5><i class="bi bi-exclamation-triangle me-2"></i>Incident Response & Business Continuity</h5>
+
+            <div class="question-row">
+              <div>
+                <strong>Incident Response Plan</strong><br>
+                <small class="text-muted">Is there a documented incident response plan that is tested annually?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_incident_plan" value="yes" id="ir_yes" <%= questionnaire && questionnaire.has_incident_plan === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="ir_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_incident_plan" value="no" id="ir_no" <%= questionnaire && questionnaire.has_incident_plan === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="ir_no">No</label>
+              </div>
+            </div>
+
+            <div class="question-row">
+              <div>
+                <strong>Business Continuity & Disaster Recovery</strong><br>
+                <small class="text-muted">Are BC/DR plans documented and tested at least annually?</small>
+              </div>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="has_bcdr" value="yes" id="bcdr_yes" <%= questionnaire && questionnaire.has_bcdr === 'yes' ? 'checked' : '' %>>
+                <label class="btn btn-outline-success" for="bcdr_yes">Yes</label>
+                <input type="radio" class="btn-check" name="has_bcdr" value="no" id="bcdr_no" <%= questionnaire && questionnaire.has_bcdr === 'no' ? 'checked' : '' %>>
+                <label class="btn btn-outline-danger" for="bcdr_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/vendors/<%= vendor.id %>" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-check-lg me-2"></i>Submit Questionnaire
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../partials/footer") %>
+</body>
+</html>

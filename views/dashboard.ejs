@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .stat-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .stat-card .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #1e293b; }
+    .stat-card .stat-label { color: #64748b; font-size: 0.875rem; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card-header { background: white; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .badge-critical { background-color: #dc2626; }
+    .badge-high { background-color: #ea580c; }
+    .badge-medium { background-color: #ca8a04; }
+    .badge-low { background-color: #16a34a; }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { active: 'dashboard' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0">Dashboard</h4>
+        <small class="text-muted">Welcome back, <%= user.name %></small>
+      </div>
+      <a href="/vendors/new" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Onboard Vendor
+      </a>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-4 col-lg-2">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+              <i class="bi bi-building"></i>
+            </div>
+            <div>
+              <div class="stat-value"><%= stats.totalVendors %></div>
+              <div class="stat-label">Total Vendors</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-success bg-opacity-10 text-success">
+              <i class="bi bi-check-circle"></i>
+            </div>
+            <div>
+              <div class="stat-value"><%= stats.activeVendors %></div>
+              <div class="stat-label">Active</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div>
+              <div class="stat-value"><%= stats.pendingAssessments %></div>
+              <div class="stat-label">Pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div>
+              <div class="stat-value"><%= stats.openIssues %></div>
+              <div class="stat-label">Open Issues</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background: rgba(220,38,38,0.1); color: #dc2626;">
+              <i class="bi bi-shield-exclamation"></i>
+            </div>
+            <div>
+              <div class="stat-value"><%= stats.criticalVendors %></div>
+              <div class="stat-label">Critical</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background: rgba(234,88,12,0.1); color: #ea580c;">
+              <i class="bi bi-shield-fill-exclamation"></i>
+            </div>
+            <div>
+              <div class="stat-value"><%= stats.highVendors %></div>
+              <div class="stat-label">High Risk</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TPRM Lifecycle Overview -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-diagram-3 me-2"></i>TPRM Lifecycle</span>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col">
+            <a href="/vendors/new" class="text-decoration-none">
+              <div class="p-3 rounded bg-light">
+                <i class="bi bi-1-circle-fill text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2 mb-0">Onboarding</h6>
+                <small class="text-muted">Register new vendors</small>
+              </div>
+            </a>
+          </div>
+          <div class="col">
+            <div class="p-3 rounded bg-light">
+              <i class="bi bi-2-circle-fill text-primary" style="font-size: 2rem;"></i>
+              <h6 class="mt-2 mb-0">Assessment</h6>
+              <small class="text-muted">Risk evaluation</small>
+            </div>
+          </div>
+          <div class="col">
+            <div class="p-3 rounded bg-light">
+              <i class="bi bi-3-circle-fill text-primary" style="font-size: 2rem;"></i>
+              <h6 class="mt-2 mb-0">Questionnaire</h6>
+              <small class="text-muted">Security review</small>
+            </div>
+          </div>
+          <div class="col">
+            <a href="/monitoring" class="text-decoration-none">
+              <div class="p-3 rounded bg-light">
+                <i class="bi bi-4-circle-fill text-primary" style="font-size: 2rem;"></i>
+                <h6 class="mt-2 mb-0">Monitoring</h6>
+                <small class="text-muted">Ongoing oversight</small>
+              </div>
+            </a>
+          </div>
+          <div class="col">
+            <div class="p-3 rounded bg-light">
+              <i class="bi bi-5-circle-fill text-primary" style="font-size: 2rem;"></i>
+              <h6 class="mt-2 mb-0">Offboarding</h6>
+              <small class="text-muted">Secure termination</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Recent Vendors -->
+      <div class="col-lg-7">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-building me-2"></i>Recent Vendors</span>
+            <a href="/vendors" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+          <div class="card-body p-0">
+            <% if (vendors.length === 0) { %>
+              <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-2">No vendors yet. Start by onboarding a vendor.</p>
+                <a href="/vendors/new" class="btn btn-primary">
+                  <i class="bi bi-plus-lg me-2"></i>Onboard Vendor
+                </a>
+              </div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Vendor</th>
+                      <th>Status</th>
+                      <th>Risk Tier</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% vendors.forEach(vendor => { %>
+                      <tr>
+                        <td>
+                          <strong><%= vendor.vendor_name %></strong><br>
+                          <small class="text-muted"><%= vendor.service_description ? vendor.service_description.substring(0, 40) + '...' : 'N/A' %></small>
+                        </td>
+                        <td>
+                          <span class="badge bg-<%= vendor.status === 'active' ? 'success' : vendor.status === 'pending' ? 'warning' : vendor.status === 'offboarding' ? 'danger' : 'secondary' %>">
+                            <%= vendor.status %>
+                          </span>
+                        </td>
+                        <td>
+                          <% if (vendor.risk_tier) { %>
+                            <span class="badge badge-<%= vendor.risk_tier %>"><%= vendor.risk_tier.toUpperCase() %></span>
+                          <% } else { %>
+                            <span class="text-muted">-</span>
+                          <% } %>
+                        </td>
+                        <td>
+                          <a href="/vendors/<%= vendor.id %>" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header">
+            <i class="bi bi-clock-history me-2"></i>Recent Activity
+          </div>
+          <div class="card-body p-0">
+            <% if (recentActivity.length === 0) { %>
+              <div class="text-center py-5">
+                <i class="bi bi-activity text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">No activity yet</p>
+              </div>
+            <% } else { %>
+              <ul class="list-group list-group-flush">
+                <% recentActivity.forEach(activity => { %>
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <i class="bi bi-<%=
+                          activity.action.includes('created') ? 'plus-circle text-success' :
+                          activity.action.includes('completed') ? 'check-circle text-primary' :
+                          activity.action.includes('login') ? 'box-arrow-in-right text-info' :
+                          'circle text-secondary'
+                        %> me-2"></i>
+                        <span><%= activity.details %></span>
+                        <% if (activity.vendor_name) { %>
+                          <br><small class="text-muted ms-4"><%= activity.vendor_name %></small>
+                        <% } %>
+                      </div>
+                      <small class="text-muted"><%= new Date(activity.created_at).toLocaleDateString() %></small>
+                    </div>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("partials/footer") %>
+</body>
+</html>

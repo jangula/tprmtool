@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .badge-critical { background-color: #dc2626; }
+    .badge-high { background-color: #ea580c; }
+    .badge-medium { background-color: #ca8a04; }
+    .badge-low { background-color: #16a34a; }
+    .risk-bar { height: 30px; border-radius: 4px; }
+    @media print {
+      .sidebar, .top-bar, .no-print { display: none !important; }
+      .main-content { margin-left: 0 !important; padding: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { active: 'reports' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reports</h4>
+        <small class="text-muted">TPRM Portfolio Overview</small>
+      </div>
+      <button class="btn btn-outline-primary no-print" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i>Print Report
+      </button>
+    </div>
+
+    <!-- Executive Summary -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-briefcase me-2"></i>Executive Summary</div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-2">
+            <h2 class="text-primary mb-0"><%= stats.totalVendors %></h2>
+            <small class="text-muted">Total Vendors</small>
+          </div>
+          <div class="col-md-2">
+            <h2 class="text-success mb-0"><%= stats.activeVendors %></h2>
+            <small class="text-muted">Active</small>
+          </div>
+          <div class="col-md-2">
+            <h2 class="text-warning mb-0"><%= stats.pendingAssessments %></h2>
+            <small class="text-muted">Pending Review</small>
+          </div>
+          <div class="col-md-2">
+            <h2 class="text-danger mb-0"><%= stats.criticalVendors %></h2>
+            <small class="text-muted">Critical Risk</small>
+          </div>
+          <div class="col-md-2">
+            <h2 style="color: #ea580c;" class="mb-0"><%= stats.highVendors %></h2>
+            <small class="text-muted">High Risk</small>
+          </div>
+          <div class="col-md-2">
+            <h2 class="text-danger mb-0"><%= stats.openIssues %></h2>
+            <small class="text-muted">Open Issues</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Distribution -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Risk Tier Distribution</div>
+          <div class="card-body">
+            <%
+              const critical = vendors.filter(v => v.risk_tier === 'critical').length;
+              const high = vendors.filter(v => v.risk_tier === 'high').length;
+              const medium = vendors.filter(v => v.risk_tier === 'medium').length;
+              const low = vendors.filter(v => v.risk_tier === 'low').length;
+              const unassessed = vendors.filter(v => !v.risk_tier).length;
+              const total = vendors.length || 1;
+            %>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge badge-critical">Critical</span></span>
+                <span><%= critical %> vendors (<%= Math.round(critical/total*100) %>%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar" style="width: <%= critical/total*100 %>%; background-color: #dc2626;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge badge-high">High</span></span>
+                <span><%= high %> vendors (<%= Math.round(high/total*100) %>%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar" style="width: <%= high/total*100 %>%; background-color: #ea580c;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge badge-medium">Medium</span></span>
+                <span><%= medium %> vendors (<%= Math.round(medium/total*100) %>%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar" style="width: <%= medium/total*100 %>%; background-color: #ca8a04;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge badge-low">Low</span></span>
+                <span><%= low %> vendors (<%= Math.round(low/total*100) %>%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar" style="width: <%= low/total*100 %>%; background-color: #16a34a;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge bg-secondary">Unassessed</span></span>
+                <span><%= unassessed %> vendors (<%= Math.round(unassessed/total*100) %>%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-secondary" style="width: <%= unassessed/total*100 %>%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="bi bi-graph-up me-2"></i>Vendor Status Breakdown</div>
+          <div class="card-body">
+            <%
+              const active = vendors.filter(v => v.status === 'active').length;
+              const pending = vendors.filter(v => v.status === 'pending').length;
+              const offboarding = vendors.filter(v => v.status === 'offboarding').length;
+              const offboarded = vendors.filter(v => v.status === 'offboarded').length;
+            %>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge bg-success">Active</span></span>
+                <span><%= active %> vendors</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-success" style="width: <%= active/total*100 %>%;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge bg-warning">Pending Assessment</span></span>
+                <span><%= pending %> vendors</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-warning" style="width: <%= pending/total*100 %>%;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge bg-danger">Offboarding</span></span>
+                <span><%= offboarding %> vendors</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-danger" style="width: <%= offboarding/total*100 %>%;"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><span class="badge bg-secondary">Offboarded</span></span>
+                <span><%= offboarded %> vendors</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-secondary" style="width: <%= offboarded/total*100 %>%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendor Inventory -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-table me-2"></i>Vendor Inventory</div>
+      <div class="card-body p-0">
+        <% if (vendors.length === 0) { %>
+          <div class="text-center py-5">
+            <p class="text-muted">No vendors in the system yet.</p>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Vendor Name</th>
+                  <th>Service</th>
+                  <th>Contract Value</th>
+                  <th>Status</th>
+                  <th>Risk Tier</th>
+                  <th>Contract End</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% vendors.forEach(vendor => { %>
+                  <tr>
+                    <td><strong><%= vendor.vendor_name %></strong></td>
+                    <td><small><%= vendor.service_description ? vendor.service_description.substring(0, 40) + '...' : '-' %></small></td>
+                    <td>$<%= vendor.contract_value ? vendor.contract_value.toLocaleString() : '0' %></td>
+                    <td>
+                      <span class="badge bg-<%= vendor.status === 'active' ? 'success' : vendor.status === 'pending' ? 'warning' : vendor.status === 'offboarding' ? 'danger' : 'secondary' %>">
+                        <%= vendor.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (vendor.risk_tier) { %>
+                        <span class="badge badge-<%= vendor.risk_tier %>"><%= vendor.risk_tier.toUpperCase() %></span>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td><%= vendor.contract_end || '-' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="text-center text-muted mt-4 no-print">
+      <small>Report generated on <%= new Date().toLocaleString() %></small>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("partials/footer") %>
+</body>
+</html>

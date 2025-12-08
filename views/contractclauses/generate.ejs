@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Contract Clauses - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .card-header { background: white; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .clause-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+    .clause-card h6 { color: #1e3a5f; margin-bottom: 0.75rem; }
+    .clause-card p { margin-bottom: 0; font-size: 0.95rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'clauses' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-magic me-2"></i>Generate Contract Clauses</h4>
+        <small class="text-muted">Configure options to generate tailored security and compliance clauses</small>
+      </div>
+      <a href="/contract-clauses" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back
+      </a>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-5">
+        <form method="POST" action="/contract-clauses/generate">
+          <div class="card">
+            <div class="card-header"><i class="bi bi-gear me-2"></i>Configuration</div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Service Type</label>
+                <select class="form-select" name="service_type" required>
+                  <option value="">Select service type...</option>
+                  <option value="saas" <%= (formData && formData.service_type === 'saas') ? 'selected' : '' %>>SaaS / Cloud Software</option>
+                  <option value="cloud" <%= (formData && formData.service_type === 'cloud') ? 'selected' : '' %>>Cloud Infrastructure (IaaS/PaaS)</option>
+                  <option value="managed" <%= (formData && formData.service_type === 'managed') ? 'selected' : '' %>>Managed Services</option>
+                  <option value="consulting" <%= (formData && formData.service_type === 'consulting') ? 'selected' : '' %>>Consulting / Professional Services</option>
+                  <option value="outsourcing" <%= (formData && formData.service_type === 'outsourcing') ? 'selected' : '' %>>Business Process Outsourcing</option>
+                  <option value="data_processing" <%= (formData && formData.service_type === 'data_processing') ? 'selected' : '' %>>Data Processing Services</option>
+                  <option value="hardware" <%= (formData && formData.service_type === 'hardware') ? 'selected' : '' %>>Hardware / Equipment</option>
+                  <option value="other" <%= (formData && formData.service_type === 'other') ? 'selected' : '' %>>Other</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Will vendor handle personal/sensitive data?</label>
+                <select class="form-select" name="data_handled" required>
+                  <option value="no" <%= (formData && formData.data_handled === 'no') ? 'selected' : '' %>>No - No personal data</option>
+                  <option value="yes" <%= (formData && formData.data_handled === 'yes') ? 'selected' : '' %>>Yes - Personal/sensitive data involved</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Data Sensitivity Level</label>
+                <select class="form-select" name="data_sensitivity" required>
+                  <option value="low" <%= (formData && formData.data_sensitivity === 'low') ? 'selected' : '' %>>Low - Public or non-sensitive data</option>
+                  <option value="medium" <%= (formData && formData.data_sensitivity === 'medium') ? 'selected' : '' %>>Medium - Internal/confidential data</option>
+                  <option value="high" <%= (formData && formData.data_sensitivity === 'high') ? 'selected' : '' %>>High - Highly sensitive/regulated data</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Integration Type</label>
+                <select class="form-select" name="integration_type">
+                  <option value="none" <%= (formData && formData.integration_type === 'none') ? 'selected' : '' %>>No technical integration</option>
+                  <option value="api" <%= (formData && formData.integration_type === 'api') ? 'selected' : '' %>>API Integration</option>
+                  <option value="network" <%= (formData && formData.integration_type === 'network') ? 'selected' : '' %>>Network Access</option>
+                  <option value="system" <%= (formData && formData.integration_type === 'system') ? 'selected' : '' %>>System/Database Access</option>
+                  <option value="full" <%= (formData && formData.integration_type === 'full') ? 'selected' : '' %>>Full Integration</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Regulatory Requirements</label>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="ETA"> ETA (Namibia Electronic Transactions)</div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="FIA"> FIA/AML (Anti-Money Laundering)</div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="NAMFISA"> NAMFISA (Financial Institutions)</div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="BON"> Bank of Namibia Requirements</div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="POPIA"> POPIA (South African Data)</div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="GDPR"> GDPR (EU Data)</div>
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="regulatory_requirements" value="PCI-DSS"> PCI-DSS (Payment Card)</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">SLA Requirements</label>
+                <select class="form-select" name="sla_requirements">
+                  <option value="standard">Standard SLA</option>
+                  <option value="enhanced">Enhanced SLA (99.5%+ uptime)</option>
+                  <option value="premium">Premium SLA (99.9%+ uptime)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-magic me-2"></i>Generate Clauses
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-file-earmark-text me-2"></i>Generated Clauses</span>
+            <% if (generatedClauses) { %>
+              <button class="btn btn-sm btn-outline-primary" onclick="copyAll()">
+                <i class="bi bi-clipboard"></i> Copy All
+              </button>
+            <% } %>
+          </div>
+          <div class="card-body">
+            <% if (generatedClauses && generatedClauses.length > 0) { %>
+              <div id="clausesContainer">
+                <% generatedClauses.forEach((clause, index) => { %>
+                  <div class="clause-card">
+                    <h6><%= clause.title %></h6>
+                    <p><%= clause.content %></p>
+                  </div>
+                <% }) %>
+              </div>
+
+              <hr>
+              <form method="POST" action="/contract-clauses/save">
+                <input type="hidden" name="service_type" value="<%= formData ? formData.service_type : '' %>">
+                <input type="hidden" name="data_handled" value="<%= formData ? formData.data_handled : '' %>">
+                <input type="hidden" name="data_sensitivity" value="<%= formData ? formData.data_sensitivity : '' %>">
+                <input type="hidden" name="integration_type" value="<%= formData ? formData.integration_type : '' %>">
+                <input type="hidden" name="regulatory_requirements" value="<%= formData ? formData.regulatory_requirements : '' %>">
+                <input type="hidden" name="sla_requirements" value="<%= formData ? formData.sla_requirements : '' %>">
+                <input type="hidden" name="generated_clauses" value="<%= JSON.stringify(generatedClauses) %>">
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Link to Vendor (Optional)</label>
+                  <select class="form-select" name="vendor_id">
+                    <option value="">General - Not linked to vendor</option>
+                    <% vendors.forEach(vendor => { %>
+                      <option value="<%= vendor.id %>"><%= vendor.vendor_name %></option>
+                    <% }) %>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Custom Clauses (Optional)</label>
+                  <textarea class="form-control" name="custom_clauses" rows="3" placeholder="Add any custom clauses specific to this engagement..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-save me-2"></i>Save Clauses
+                </button>
+              </form>
+            <% } else { %>
+              <div class="text-center py-5 text-muted">
+                <i class="bi bi-arrow-left-circle display-4"></i>
+                <p class="mt-3">Configure options on the left and click "Generate Clauses" to create tailored contract clauses.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function copyAll() {
+      const container = document.getElementById('clausesContainer');
+      const text = container.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Clauses copied to clipboard!');
+      });
+    }
+  </script>
+<%- include("../partials/footer") %>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TPRM Tool - Third Party Risk Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --sidebar-width: 250px;
+    }
+    body {
+      min-height: 100vh;
+      background-color: #f8fafc;
+    }
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
+      min-height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-brand h4 {
+      color: white;
+      margin: 0;
+      font-weight: 700;
+    }
+    .sidebar-brand small {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.75rem;
+    }
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+    .sidebar-nav .nav-link {
+      color: rgba(255,255,255,0.7);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s;
+    }
+    .sidebar-nav .nav-link:hover,
+    .sidebar-nav .nav-link.active {
+      color: white;
+      background: rgba(255,255,255,0.1);
+    }
+    .sidebar-nav .nav-link i {
+      font-size: 1.1rem;
+    }
+    .sidebar-section {
+      padding: 0.5rem 1.5rem;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 1rem;
+    }
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+    }
+    .top-bar {
+      background: white;
+      padding: 1rem 2rem;
+      margin: -2rem -2rem 2rem -2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-card .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .stat-card .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .stat-card .stat-label {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .card-header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 600;
+    }
+    .badge-critical { background-color: #dc2626; }
+    .badge-high { background-color: #ea580c; }
+    .badge-medium { background-color: #ca8a04; }
+    .badge-low { background-color: #16a34a; }
+    .status-active { color: #16a34a; }
+    .status-pending { color: #ca8a04; }
+    .status-offboarding { color: #ea580c; }
+    .status-offboarded { color: #64748b; }
+    .lifecycle-step {
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+    }
+    .lifecycle-step .step-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-size: 1.5rem;
+      background: #e2e8f0;
+      color: #64748b;
+    }
+    .lifecycle-step.completed .step-icon {
+      background: #16a34a;
+      color: white;
+    }
+    .lifecycle-step.active .step-icon {
+      background: #2563eb;
+      color: white;
+    }
+    .form-section {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-section h5 {
+      color: #1e3a5f;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <%- body %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

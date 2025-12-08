@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  tprm-app:
+    build: .
+    ports:
+      - "8888:8888"
+    environment:
+      - NODE_ENV=production
+      - PORT=8888
+      - SESSION_SECRET=your-secure-session-secret-change-me
+    volumes:
+      - tprm-data:/app/db
+    restart: unless-stopped
+
+volumes:
+  tprm-data:

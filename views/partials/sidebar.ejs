@@ -1,0 +1,69 @@
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <h4><i class="bi bi-shield-check"></i> TPRM</h4>
+    <small>Third Party Risk Management</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="nav-link <%= typeof active !== 'undefined' && active === 'dashboard' ? 'active' : '' %>">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    <div class="sidebar-section">Lifecycle Management</div>
+
+    <a href="/vendors" class="nav-link <%= typeof active !== 'undefined' && active === 'vendors' ? 'active' : '' %>">
+      <i class="bi bi-building"></i> Vendors
+    </a>
+    <a href="/vendors/new" class="nav-link <%= typeof active !== 'undefined' && active === 'onboarding' ? 'active' : '' %>">
+      <i class="bi bi-plus-circle"></i> Onboard Vendor
+    </a>
+    <a href="/monitoring" class="nav-link <%= typeof active !== 'undefined' && active === 'monitoring' ? 'active' : '' %>">
+      <i class="bi bi-eye"></i> Monitoring & Issues
+    </a>
+
+    <div class="sidebar-section">Risk Management</div>
+
+    <a href="/risk-management" class="nav-link <%= typeof active !== 'undefined' && active === 'riskmanagement' ? 'active' : '' %>">
+      <i class="bi bi-shield-exclamation"></i> Assessment Hub
+    </a>
+    <a href="/risk-management/assessment" class="nav-link <%= typeof active !== 'undefined' && active === 'assessment' ? 'active' : '' %>">
+      <i class="bi bi-clipboard-data"></i> Risk Assessment
+    </a>
+    <a href="/risk-management/questionnaire" class="nav-link <%= typeof active !== 'undefined' && active === 'questionnaire' ? 'active' : '' %>">
+      <i class="bi bi-file-earmark-check"></i> Security Questionnaire
+    </a>
+    <a href="/risk-management/data-processing" class="nav-link <%= typeof active !== 'undefined' && active === 'dataprocessing' ? 'active' : '' %>">
+      <i class="bi bi-database-check"></i> Data Processing
+    </a>
+    <a href="/risk-management/soc2" class="nav-link <%= typeof active !== 'undefined' && active === 'soc2' ? 'active' : '' %>">
+      <i class="bi bi-award"></i> SOC 2 Review
+    </a>
+    <a href="/risk-management/ai-risk" class="nav-link <%= typeof active !== 'undefined' && active === 'airisk' ? 'active' : '' %>">
+      <i class="bi bi-robot"></i> AI Risk Assessment
+    </a>
+
+    <div class="sidebar-section">Resources & Tools</div>
+
+    <a href="/guidelines" class="nav-link <%= typeof active !== 'undefined' && active === 'guidelines' ? 'active' : '' %>">
+      <i class="bi bi-signpost-2"></i> TPRM Guidelines
+    </a>
+    <a href="/policy" class="nav-link <%= typeof active !== 'undefined' && active === 'policy' ? 'active' : '' %>">
+      <i class="bi bi-file-earmark-ruled"></i> Policy Generator
+    </a>
+    <a href="/contract-clauses" class="nav-link <%= typeof active !== 'undefined' && active === 'clauses' ? 'active' : '' %>">
+      <i class="bi bi-file-earmark-text"></i> Contract Clauses
+    </a>
+
+    <div class="sidebar-section">Reports</div>
+
+    <a href="/reports" class="nav-link <%= typeof active !== 'undefined' && active === 'reports' ? 'active' : '' %>">
+      <i class="bi bi-file-earmark-bar-graph"></i> Reports
+    </a>
+
+    <div class="sidebar-section">Account</div>
+
+    <a href="/logout" class="nav-link">
+      <i class="bi bi-box-arrow-left"></i> Logout
+    </a>
+  </nav>
+</div>

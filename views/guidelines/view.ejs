@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= guideline.title %> - TPRM Guidelines</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .step-card { border-left: 4px solid #1e3a5f; }
+    .step-number { width: 40px; height: 40px; background: #1e3a5f; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+    .step-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .task-list { list-style: none; padding: 0; }
+    .task-list li { padding: 0.5rem 0; padding-left: 1.5rem; position: relative; }
+    .task-list li:before { content: '\f26a'; font-family: 'bootstrap-icons'; position: absolute; left: 0; color: #22c55e; }
+    .document-badge { background: #e2e8f0; color: #1e3a5f; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin: 0.25rem; }
+    .responsible-badge { background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; }
+    .hero-section { background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; }
+    .progress-tracker { display: flex; justify-content: space-between; margin-bottom: 2rem; padding: 0 1rem; }
+    .progress-step { text-align: center; flex: 1; position: relative; }
+    .progress-step:not(:last-child):after { content: ''; position: absolute; top: 15px; left: 50%; width: 100%; height: 2px; background: #e2e8f0; }
+    .progress-dot { width: 30px; height: 30px; background: #e2e8f0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; position: relative; z-index: 1; }
+    .progress-step.active .progress-dot { background: #1e3a5f; color: white; }
+    @media print {
+      .sidebar, .top-bar { display: none; }
+      .main-content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'guidelines' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-signpost-2 me-2"></i><%= guideline.title %></h4>
+        <small class="text-muted"><%= guideline.description %></small>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary me-2" onclick="window.print()">
+          <i class="bi bi-printer me-2"></i>Print Guide
+        </button>
+        <a href="/guidelines" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Back
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-section">
+      <h2><%= guideline.title %></h2>
+      <p class="mb-3"><%= guideline.description %></p>
+      <div class="d-flex gap-3">
+        <span><i class="bi bi-list-ol me-2"></i><%= guideline.steps.length %> Steps</span>
+        <span><i class="bi bi-clock me-2"></i>Follow in order</span>
+      </div>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-3">Process Overview</h6>
+        <div class="progress-tracker">
+          <% guideline.steps.forEach((step, index) => { %>
+            <div class="progress-step">
+              <div class="progress-dot"><%= step.step %></div>
+              <div class="small mt-1" style="font-size: 0.7rem;"><%= step.title.substring(0, 15) %>...</div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Steps -->
+    <% guideline.steps.forEach((step) => { %>
+      <div class="card step-card">
+        <div class="card-body">
+          <div class="step-header">
+            <div class="step-number"><%= step.step %></div>
+            <div>
+              <h5 class="mb-0"><%= step.title %></h5>
+              <small class="text-muted"><%= step.description %></small>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-8">
+              <h6><i class="bi bi-check2-square me-2"></i>Tasks to Complete</h6>
+              <ul class="task-list">
+                <% step.tasks.forEach((task) => { %>
+                  <li><%= task %></li>
+                <% }); %>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <h6><i class="bi bi-person me-2"></i>Responsible</h6>
+                <span class="responsible-badge"><%= step.responsible %></span>
+              </div>
+              <div>
+                <h6><i class="bi bi-file-earmark me-2"></i>Documents</h6>
+                <% step.documents.forEach((doc) => { %>
+                  <span class="document-badge"><%= doc %></span>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+
+    <div class="card bg-light">
+      <div class="card-body">
+        <h5><i class="bi bi-lightbulb me-2"></i>Next Steps</h5>
+        <p>Once you've completed all the steps above:</p>
+        <ul>
+          <li>Use the <a href="/vendors/new">Vendor Onboarding Form</a> to register the vendor in the TPRM system</li>
+          <li>Use the <a href="/contract-clauses">Contract Clause Generator</a> to get required contract clauses</li>
+          <li>Contact the TPRM team if you need assistance at any step</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../partials/footer") %>
+</body>
+</html>

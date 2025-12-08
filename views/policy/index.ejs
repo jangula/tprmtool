@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TPRM Policy Generator - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .card-header { background: white; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .policy-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+    .policy-section h5 { color: #1e3a5f; margin-bottom: 1rem; border-bottom: 2px solid #1e3a5f; padding-bottom: 0.5rem; }
+    .policy-section pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+    .policy-header { text-align: center; border-bottom: 2px solid #1e3a5f; padding-bottom: 1rem; margin-bottom: 2rem; }
+    @media print {
+      .sidebar, .top-bar, .config-card, .btn { display: none !important; }
+      .main-content { margin-left: 0; padding: 0; }
+      .policy-output { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'policy' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-file-earmark-ruled me-2"></i>TPRM Policy Generator</h4>
+        <small class="text-muted">Generate a customized Third Party Risk Management policy</small>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-5">
+        <form method="POST" action="/policy/generate" class="config-card">
+          <div class="card">
+            <div class="card-header"><i class="bi bi-gear me-2"></i>Policy Configuration</div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Organization Name</label>
+                <input type="text" class="form-control" name="organization_name" value="<%= formData ? formData.organization_name : '' %>" placeholder="Your Organization Name">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Industry</label>
+                <select class="form-select" name="industry">
+                  <option value="standard" <%= formData && formData.industry === 'standard' ? 'selected' : '' %>>Standard / General</option>
+                  <option value="financial" <%= formData && formData.industry === 'financial' ? 'selected' : '' %>>Financial Services</option>
+                  <option value="healthcare" <%= formData && formData.industry === 'healthcare' ? 'selected' : '' %>>Healthcare</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Scope Detail Level</label>
+                <select class="form-select" name="scope_detail">
+                  <option value="standard" <%= formData && formData.scope_detail === 'standard' ? 'selected' : '' %>>Standard</option>
+                  <option value="comprehensive" <%= formData && formData.scope_detail === 'comprehensive' ? 'selected' : '' %>>Comprehensive</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Risk Assessment Approach</label>
+                <select class="form-select" name="risk_approach">
+                  <option value="simple" <%= formData && formData.risk_approach === 'simple' ? 'selected' : '' %>>Simple Assessment</option>
+                  <option value="tiered" <%= formData && formData.risk_approach === 'tiered' ? 'selected' : '' %>>Tiered Risk Classification</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Due Diligence Level</label>
+                <select class="form-select" name="due_diligence_level">
+                  <option value="standard" <%= formData && formData.due_diligence_level === 'standard' ? 'selected' : '' %>>Standard</option>
+                  <option value="comprehensive" <%= formData && formData.due_diligence_level === 'comprehensive' ? 'selected' : '' %>>Comprehensive</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Contract Requirements Detail</label>
+                <select class="form-select" name="contract_detail">
+                  <option value="standard" <%= formData && formData.contract_detail === 'standard' ? 'selected' : '' %>>Standard</option>
+                  <option value="detailed" <%= formData && formData.contract_detail === 'detailed' ? 'selected' : '' %>>Detailed</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Monitoring Approach</label>
+                <select class="form-select" name="monitoring_approach">
+                  <option value="periodic" <%= formData && formData.monitoring_approach === 'periodic' ? 'selected' : '' %>>Periodic Reviews</option>
+                  <option value="continuous" <%= formData && formData.monitoring_approach === 'continuous' ? 'selected' : '' %>>Continuous Monitoring</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Incident Management Detail</label>
+                <select class="form-select" name="incident_detail">
+                  <option value="standard" <%= formData && formData.incident_detail === 'standard' ? 'selected' : '' %>>Standard</option>
+                  <option value="detailed" <%= formData && formData.incident_detail === 'detailed' ? 'selected' : '' %>>Detailed</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Offboarding Detail</label>
+                <select class="form-select" name="offboarding_detail">
+                  <option value="standard" <%= formData && formData.offboarding_detail === 'standard' ? 'selected' : '' %>>Standard</option>
+                  <option value="detailed" <%= formData && formData.offboarding_detail === 'detailed' ? 'selected' : '' %>>Detailed</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Roles & Responsibilities Detail</label>
+                <select class="form-select" name="roles_detail">
+                  <option value="standard" <%= formData && formData.roles_detail === 'standard' ? 'selected' : '' %>>Standard</option>
+                  <option value="detailed" <%= formData && formData.roles_detail === 'detailed' ? 'selected' : '' %>>Detailed</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Applicable Regulations</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="ETA" <%= formData && formData.regulations && formData.regulations.includes('ETA') ? 'checked' : '' %>>
+                  <label class="form-check-label">ETA (Namibia)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="FIA" <%= formData && formData.regulations && formData.regulations.includes('FIA') ? 'checked' : '' %>>
+                  <label class="form-check-label">FIA/AML</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="NAMFISA" <%= formData && formData.regulations && formData.regulations.includes('NAMFISA') ? 'checked' : '' %>>
+                  <label class="form-check-label">NAMFISA</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="BON" <%= formData && formData.regulations && formData.regulations.includes('BON') ? 'checked' : '' %>>
+                  <label class="form-check-label">Bank of Namibia</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="POPIA" <%= formData && formData.regulations && formData.regulations.includes('POPIA') ? 'checked' : '' %>>
+                  <label class="form-check-label">POPIA (SA Data)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="GDPR" <%= formData && formData.regulations && formData.regulations.includes('GDPR') ? 'checked' : '' %>>
+                  <label class="form-check-label">GDPR (EU Data)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="regulations" value="PCI-DSS" <%= formData && formData.regulations && formData.regulations.includes('PCI-DSS') ? 'checked' : '' %>>
+                  <label class="form-check-label">PCI-DSS</label>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Policy Owner</label>
+                <input type="text" class="form-control" name="policy_owner" value="<%= formData ? formData.policy_owner : '' %>" placeholder="e.g., Chief Risk Officer">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Review Frequency</label>
+                <select class="form-select" name="review_frequency">
+                  <option value="annually" <%= formData && formData.review_frequency === 'annually' ? 'selected' : '' %>>Annually</option>
+                  <option value="semi-annually" <%= formData && formData.review_frequency === 'semi-annually' ? 'selected' : '' %>>Semi-Annually</option>
+                  <option value="quarterly" <%= formData && formData.review_frequency === 'quarterly' ? 'selected' : '' %>>Quarterly</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-file-earmark-plus me-2"></i>Generate Policy
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card policy-output">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-file-earmark-text me-2"></i>Generated Policy</span>
+            <% if (generatedPolicy) { %>
+              <div>
+                <button class="btn btn-sm btn-outline-primary me-2" onclick="copyPolicy()">
+                  <i class="bi bi-clipboard"></i> Copy
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                  <i class="bi bi-printer"></i> Print
+                </button>
+              </div>
+            <% } %>
+          </div>
+          <div class="card-body" id="policyContent">
+            <% if (generatedPolicy) { %>
+              <div class="policy-header">
+                <h3><%= generatedPolicy.title %></h3>
+                <p class="text-muted mb-0">
+                  Version: <%= generatedPolicy.version %> | Effective Date: <%= generatedPolicy.effectiveDate %>
+                </p>
+              </div>
+
+              <% generatedPolicy.sections.forEach((section) => { %>
+                <div class="policy-section">
+                  <h5><%= section.title %></h5>
+                  <pre><%- section.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') %></pre>
+                </div>
+              <% }); %>
+
+              <div class="policy-section">
+                <h5>Document Control</h5>
+                <table class="table table-sm">
+                  <tr><td><strong>Version</strong></td><td><%= generatedPolicy.version %></td></tr>
+                  <tr><td><strong>Effective Date</strong></td><td><%= generatedPolicy.effectiveDate %></td></tr>
+                  <tr><td><strong>Last Reviewed</strong></td><td><%= generatedPolicy.effectiveDate %></td></tr>
+                  <tr><td><strong>Next Review</strong></td><td>As per review frequency</td></tr>
+                </table>
+              </div>
+
+            <% } else { %>
+              <div class="text-center py-5 text-muted">
+                <i class="bi bi-arrow-left-circle display-4"></i>
+                <p class="mt-3">Configure your policy options on the left and click "Generate Policy" to create a customized TPRM policy document.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function copyPolicy() {
+      const content = document.getElementById('policyContent').innerText;
+      navigator.clipboard.writeText(content).then(() => {
+        alert('Policy copied to clipboard!');
+      });
+    }
+  </script>
+<%- include("../partials/footer") %>
+</body>
+</html>

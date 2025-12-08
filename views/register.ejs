@@ -1,0 +1,48 @@
+<%- include('layout', { body: `
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);">
+  <div class="card shadow-lg" style="width: 450px; border-radius: 16px;">
+    <div class="card-body p-5">
+      <div class="text-center mb-4">
+        <div class="mb-3">
+          <i class="bi bi-shield-check" style="font-size: 3rem; color: #2563eb;"></i>
+        </div>
+        <h3 class="fw-bold">Create Account</h3>
+        <p class="text-muted">Join the TPRM Training Session</p>
+      </div>
+
+      ${error ? '<div class="alert alert-danger">' + error + '</div>' : ''}
+
+      <form method="POST" action="/register">
+        <div class="mb-3">
+          <label class="form-label">Full Name *</label>
+          <input type="text" name="full_name" class="form-control form-control-lg" required placeholder="John Doe">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email Address *</label>
+          <input type="email" name="email" class="form-control form-control-lg" required placeholder="you@example.com">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Organization</label>
+          <input type="text" name="organization" class="form-control form-control-lg" placeholder="Company Name">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Password *</label>
+          <input type="password" name="password" class="form-control form-control-lg" required minlength="6" placeholder="Min 6 characters">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+          <i class="bi bi-person-plus me-2"></i>Create Account
+        </button>
+      </form>
+
+      <div class="text-center">
+        <span class="text-muted">Already have an account?</span>
+        <a href="/login" class="text-decoration-none fw-semibold">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>
+` }) %>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log New Issue - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .form-section { background: #f8fafc; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .form-section h5 { color: #1e3a5f; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'monitoring' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Log New Issue</h4>
+        <small class="text-muted">Document a risk issue or finding</small>
+      </div>
+      <a href="/monitoring" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Issues
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" action="/monitoring/new">
+
+          <div class="form-section">
+            <h5><i class="bi bi-info-circle me-2"></i>Issue Details</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Vendor *</label>
+                <select name="vendor_id" class="form-select" required>
+                  <option value="">Select Vendor...</option>
+                  <% vendors.forEach(vendor => { %>
+                    <option value="<%= vendor.id %>" <%= selectedVendorId == vendor.id ? 'selected' : '' %>>
+                      <%= vendor.vendor_name %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Issue Type *</label>
+                <select name="issue_type" class="form-select" required>
+                  <option value="security">Security Issue</option>
+                  <option value="compliance">Compliance Issue</option>
+                  <option value="performance">Performance Issue</option>
+                  <option value="operational">Operational Issue</option>
+                  <option value="financial">Financial Issue</option>
+                  <option value="contractual">Contractual Issue</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Issue Title *</label>
+                <input type="text" name="title" class="form-control" required placeholder="Brief description of the issue">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Detailed description of the issue..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5><i class="bi bi-speedometer2 me-2"></i>Risk Classification</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Severity *</label>
+                <select name="severity" class="form-select" required>
+                  <option value="low">Low - Minor impact, no immediate action needed</option>
+                  <option value="medium" selected>Medium - Moderate impact, action within 30 days</option>
+                  <option value="high">High - Significant impact, action within 7 days</option>
+                  <option value="critical">Critical - Severe impact, immediate action required</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Due Date</label>
+                <input type="date" name="due_date" class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5><i class="bi bi-tools me-2"></i>Remediation</h5>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Remediation Plan</label>
+                <textarea name="remediation_plan" class="form-control" rows="3" placeholder="Describe the steps to remediate this issue..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/monitoring" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-check-lg me-2"></i>Log Issue
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../partials/footer") %>
+</body>
+</html>

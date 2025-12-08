@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Management - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .card-header { background: white; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .assessment-card { transition: all 0.3s; cursor: pointer; height: 100%; }
+    .assessment-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    .assessment-card .icon-wrapper { width: 80px; height: 80px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+    .assessment-card .icon-wrapper i { font-size: 2.5rem; }
+    .stat-badge { font-size: 0.75rem; padding: 0.35rem 0.75rem; }
+    .badge-critical { background-color: #dc2626; }
+    .badge-high { background-color: #ea580c; }
+    .badge-medium { background-color: #ca8a04; }
+    .badge-low { background-color: #16a34a; }
+    .page-header { background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'riskmanagement' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Risk Management</h4>
+        <small class="text-muted">Conduct vendor risk assessments and reviews</small>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h2 class="mb-2">Vendor Risk Assessment Hub</h2>
+          <p class="mb-0 opacity-75">Select an assessment type to evaluate your vendors' risk posture, security controls, and compliance status.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <div class="d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
+            <span class="badge bg-light text-dark"><i class="bi bi-building me-1"></i><%= vendors.length %> Vendors</span>
+            <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i><%= stats.pendingAssessments %> Pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assessment Types -->
+    <div class="row g-4 mb-4">
+      <!-- Risk Assessment -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card assessment-card" onclick="window.location.href='/risk-management/assessment'">
+          <div class="card-body text-center p-4">
+            <div class="icon-wrapper bg-danger bg-opacity-10">
+              <i class="bi bi-clipboard-data text-danger"></i>
+            </div>
+            <h5 class="card-title">Risk Assessment</h5>
+            <p class="card-text text-muted small">Evaluate inherent and residual risk across financial, operational, security, and compliance domains.</p>
+            <div class="mt-3">
+              <span class="badge bg-danger stat-badge"><%= recentAssessments.length %> completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Questionnaire -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card assessment-card" onclick="window.location.href='/risk-management/questionnaire'">
+          <div class="card-body text-center p-4">
+            <div class="icon-wrapper bg-success bg-opacity-10">
+              <i class="bi bi-file-earmark-check text-success"></i>
+            </div>
+            <h5 class="card-title">Security Questionnaire</h5>
+            <p class="card-text text-muted small">Assess vendor security controls, certifications, encryption practices, and incident response capabilities.</p>
+            <div class="mt-3">
+              <span class="badge bg-success stat-badge"><%= recentQuestionnaires.length %> completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Processing Assessment -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card assessment-card" onclick="window.location.href='/risk-management/data-processing'">
+          <div class="card-body text-center p-4">
+            <div class="icon-wrapper bg-info bg-opacity-10">
+              <i class="bi bi-database-check text-info"></i>
+            </div>
+            <h5 class="card-title">Data Processing</h5>
+            <p class="card-text text-muted small">Evaluate data handling practices, privacy compliance, retention policies, and cross-border transfers.</p>
+            <div class="mt-3">
+              <span class="badge bg-info stat-badge"><%= recentDataProcessing.length %> completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOC 2 Review -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card assessment-card" onclick="window.location.href='/risk-management/soc2'">
+          <div class="card-body text-center p-4">
+            <div class="icon-wrapper bg-warning bg-opacity-10">
+              <i class="bi bi-award text-warning"></i>
+            </div>
+            <h5 class="card-title">SOC 2 Review</h5>
+            <p class="card-text text-muted small">Review SOC 2 Type I/II reports, trust service criteria coverage, and identified exceptions.</p>
+            <div class="mt-3">
+              <span class="badge bg-warning stat-badge"><%= recentSoc2.length %> completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Risk Assessment -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card assessment-card" onclick="window.location.href='/risk-management/ai-risk'">
+          <div class="card-body text-center p-4">
+            <div class="icon-wrapper bg-purple bg-opacity-10" style="background-color: rgba(139, 92, 246, 0.1);">
+              <i class="bi bi-robot" style="color: #8b5cf6;"></i>
+            </div>
+            <h5 class="card-title">AI Risk Assessment</h5>
+            <p class="card-text text-muted small">Evaluate AI/ML system risks including bias, transparency, privacy, and governance controls.</p>
+            <div class="mt-3">
+              <span class="badge stat-badge" style="background-color: #8b5cf6;"><%= recentAiRisk.length %> completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Recent Assessments -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-clipboard-data me-2"></i>Recent Risk Assessments</span>
+            <a href="/reports/export/assessments" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></a>
+          </div>
+          <div class="card-body p-0">
+            <% if (recentAssessments.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Vendor</th>
+                      <th>Date</th>
+                      <th>Risk Tier</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recentAssessments.forEach(a => { %>
+                      <tr style="cursor: pointer" onclick="window.location.href='/vendors/<%= a.vendor_id %>'">
+                        <td><%= a.vendor_name %></td>
+                        <td><%= new Date(a.created_at).toLocaleDateString() %></td>
+                        <td><span class="badge badge-<%= a.risk_tier %>"><%= a.risk_tier ? a.risk_tier.toUpperCase() : 'N/A' %></span></td>
+                        <td><%= a.inherent_risk_score %>/24</td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-4 mb-0">No risk assessments completed yet.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Questionnaires -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-file-earmark-check me-2"></i>Recent Questionnaires</span>
+            <a href="/reports/export/questionnaires" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></a>
+          </div>
+          <div class="card-body p-0">
+            <% if (recentQuestionnaires.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Vendor</th>
+                      <th>Date</th>
+                      <th>Score</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recentQuestionnaires.forEach(q => { %>
+                      <tr style="cursor: pointer" onclick="window.location.href='/vendors/<%= q.vendor_id %>'">
+                        <td><%= q.vendor_name %></td>
+                        <td><%= q.completed_date || new Date(q.created_at).toLocaleDateString() %></td>
+                        <td>
+                          <span class="badge bg-<%= q.questionnaire_score >= 80 ? 'success' : q.questionnaire_score >= 60 ? 'warning' : 'danger' %>">
+                            <%= q.questionnaire_score %>%
+                          </span>
+                        </td>
+                        <td><span class="badge bg-<%= q.status === 'completed' ? 'success' : 'warning' %>"><%= q.status %></span></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-4 mb-0">No questionnaires completed yet.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Start Guide -->
+    <div class="card mt-4">
+      <div class="card-header"><i class="bi bi-lightbulb me-2"></i>Quick Start Guide</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="d-flex align-items-start">
+              <span class="badge bg-primary rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">1</span>
+              <div>
+                <strong>Onboard Vendor</strong>
+                <p class="text-muted small mb-0">Register new vendors with contact and contract details</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex align-items-start">
+              <span class="badge bg-primary rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">2</span>
+              <div>
+                <strong>Risk Assessment</strong>
+                <p class="text-muted small mb-0">Evaluate inherent risk and determine risk tier</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex align-items-start">
+              <span class="badge bg-primary rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">3</span>
+              <div>
+                <strong>Security Review</strong>
+                <p class="text-muted small mb-0">Complete questionnaires and review certifications</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex align-items-start">
+              <span class="badge bg-primary rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">4</span>
+              <div>
+                <strong>Ongoing Monitoring</strong>
+                <p class="text-muted small mb-0">Track issues and conduct periodic reassessments</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../partials/footer") %>
+</body>
+</html>

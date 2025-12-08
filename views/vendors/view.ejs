@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= vendor.vendor_name %> - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .badge-critical { background-color: #dc2626; }
+    .badge-high { background-color: #ea580c; }
+    .badge-medium { background-color: #ca8a04; }
+    .badge-low { background-color: #16a34a; }
+    .lifecycle-step { text-align: center; padding: 1rem; }
+    .lifecycle-step .step-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-size: 1.25rem; background: #e2e8f0; color: #64748b; }
+    .lifecycle-step.completed .step-icon { background: #16a34a; color: white; }
+    .lifecycle-step.active .step-icon { background: #2563eb; color: white; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); } }
+    .info-item { padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0; }
+    .info-item:last-child { border-bottom: none; }
+    .info-label { color: #64748b; font-size: 0.875rem; }
+    .info-value { font-weight: 500; color: #1e293b; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'vendors' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><%= vendor.vendor_name %></h4>
+        <small class="text-muted">Vendor Profile & Risk Management</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/vendors" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Back
+        </a>
+        <% if (vendor.status !== 'offboarded') { %>
+          <form method="POST" action="/vendors/<%= vendor.id %>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vendor?');">
+            <button type="submit" class="btn btn-outline-danger">
+              <i class="bi bi-trash me-2"></i>Delete
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Lifecycle Progress -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-diagram-3 me-2"></i>TPRM Lifecycle Progress</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col lifecycle-step completed">
+            <div class="step-icon"><i class="bi bi-check-lg"></i></div>
+            <strong>Onboarding</strong><br>
+            <small class="text-success">Completed</small>
+          </div>
+          <div class="col lifecycle-step <%= assessment ? 'completed' : 'active' %>">
+            <div class="step-icon"><i class="bi bi-<%= assessment ? 'check-lg' : 'clipboard-data' %>"></i></div>
+            <strong>Assessment</strong><br>
+            <% if (assessment) { %>
+              <small class="text-success">Completed</small>
+            <% } else { %>
+              <small class="text-primary">Action Required</small>
+            <% } %>
+          </div>
+          <div class="col lifecycle-step <%= questionnaire ? 'completed' : (assessment ? 'active' : '') %>">
+            <div class="step-icon"><i class="bi bi-<%= questionnaire ? 'check-lg' : 'file-earmark-text' %>"></i></div>
+            <strong>Questionnaire</strong><br>
+            <% if (questionnaire) { %>
+              <small class="text-success">Completed</small>
+            <% } else if (assessment) { %>
+              <small class="text-primary">Action Required</small>
+            <% } else { %>
+              <small class="text-muted">Pending</small>
+            <% } %>
+          </div>
+          <div class="col lifecycle-step <%= (assessment && questionnaire && vendor.status === 'active') ? 'completed' : '' %>">
+            <div class="step-icon"><i class="bi bi-eye"></i></div>
+            <strong>Monitoring</strong><br>
+            <% if (assessment && questionnaire && vendor.status === 'active') { %>
+              <small class="text-success">Active</small>
+            <% } else { %>
+              <small class="text-muted">Pending</small>
+            <% } %>
+          </div>
+          <div class="col lifecycle-step <%= vendor.status === 'offboarded' ? 'completed' : (vendor.status === 'offboarding' ? 'active' : '') %>">
+            <div class="step-icon"><i class="bi bi-<%= vendor.status === 'offboarded' ? 'check-lg' : 'box-arrow-right' %>"></i></div>
+            <strong>Offboarding</strong><br>
+            <% if (vendor.status === 'offboarded') { %>
+              <small class="text-success">Completed</small>
+            <% } else if (vendor.status === 'offboarding') { %>
+              <small class="text-warning">In Progress</small>
+            <% } else { %>
+              <small class="text-muted">N/A</small>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Vendor Details -->
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-building me-2"></i>Vendor Details</div>
+          <div class="card-body">
+            <div class="info-item">
+              <div class="info-label">Status</div>
+              <span class="badge bg-<%= vendor.status === 'active' ? 'success' : vendor.status === 'pending' ? 'warning' : vendor.status === 'offboarding' ? 'danger' : 'secondary' %> fs-6">
+                <%= vendor.status.toUpperCase() %>
+              </span>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Risk Tier</div>
+              <% if (vendor.risk_tier) { %>
+                <span class="badge badge-<%= vendor.risk_tier %> fs-6"><%= vendor.risk_tier.toUpperCase() %></span>
+              <% } else { %>
+                <span class="text-muted">Not Assessed</span>
+              <% } %>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Contact</div>
+              <div class="info-value"><%= vendor.vendor_contact || '-' %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value"><%= vendor.vendor_email || '-' %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Phone</div>
+              <div class="info-value"><%= vendor.vendor_phone || '-' %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Contract Value</div>
+              <div class="info-value">$<%= vendor.contract_value ? vendor.contract_value.toLocaleString() : '0' %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Contract Period</div>
+              <div class="info-value">
+                <%= vendor.contract_start || 'N/A' %> to <%= vendor.contract_end || 'N/A' %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-file-text me-2"></i>Service Description</div>
+          <div class="card-body">
+            <p class="mb-0"><%= vendor.service_description || 'No description provided.' %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions & Assessments -->
+      <div class="col-lg-8">
+        <!-- Action Buttons -->
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-lightning me-2"></i>Quick Actions</div>
+          <div class="card-body">
+            <h6 class="text-muted mb-2">Core Assessments</h6>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <a href="/assessment/<%= vendor.id %>" class="btn btn-<%= assessment ? 'outline-primary' : 'primary' %>">
+                <i class="bi bi-clipboard-data me-2"></i><%= assessment ? 'Update' : 'Start' %> Risk Assessment
+              </a>
+              <a href="/questionnaire/<%= vendor.id %>" class="btn btn-<%= questionnaire ? 'outline-primary' : 'primary' %>">
+                <i class="bi bi-file-earmark-text me-2"></i><%= questionnaire ? 'Update' : 'Start' %> Security Questionnaire
+              </a>
+            </div>
+            <h6 class="text-muted mb-2">Additional Assessments</h6>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <a href="/data-processing/<%= vendor.id %>" class="btn btn-outline-info">
+                <i class="bi bi-database-check me-2"></i>Data Processing Assessment
+              </a>
+              <a href="/soc2/<%= vendor.id %>" class="btn btn-outline-info">
+                <i class="bi bi-file-earmark-check me-2"></i>SOC 2 Review
+              </a>
+            </div>
+            <h6 class="text-muted mb-2">Actions</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="/monitoring/new/<%= vendor.id %>" class="btn btn-outline-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>Log Issue
+              </a>
+              <% if (vendor.status === 'active' && !offboarding) { %>
+                <a href="/offboarding/<%= vendor.id %>" class="btn btn-outline-danger">
+                  <i class="bi bi-box-arrow-right me-2"></i>Initiate Offboarding
+                </a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Assessment Summary -->
+        <% if (assessment) { %>
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-clipboard-data me-2"></i>Risk Assessment Summary</span>
+              <small class="text-muted">Completed: <%= new Date(assessment.created_at).toLocaleDateString() %></small>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4 text-center">
+                  <div class="p-3 rounded" style="background: <%= assessment.risk_tier === 'critical' ? '#fee2e2' : assessment.risk_tier === 'high' ? '#ffedd5' : assessment.risk_tier === 'medium' ? '#fef9c3' : '#dcfce7' %>;">
+                    <h2 class="mb-0" style="color: <%= assessment.risk_tier === 'critical' ? '#dc2626' : assessment.risk_tier === 'high' ? '#ea580c' : assessment.risk_tier === 'medium' ? '#ca8a04' : '#16a34a' %>;">
+                      <%= assessment.inherent_risk_score %>/24
+                    </h2>
+                    <small>Inherent Risk Score</small>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="row g-2">
+                    <div class="col-6"><small class="text-muted">Financial:</small> <span class="badge badge-<%= assessment.financial_risk %>"><%= assessment.financial_risk %></span></div>
+                    <div class="col-6"><small class="text-muted">Operational:</small> <span class="badge badge-<%= assessment.operational_risk %>"><%= assessment.operational_risk %></span></div>
+                    <div class="col-6"><small class="text-muted">Security:</small> <span class="badge badge-<%= assessment.security_risk %>"><%= assessment.security_risk %></span></div>
+                    <div class="col-6"><small class="text-muted">Compliance:</small> <span class="badge badge-<%= assessment.compliance_risk %>"><%= assessment.compliance_risk %></span></div>
+                    <div class="col-6"><small class="text-muted">Reputational:</small> <span class="badge badge-<%= assessment.reputational_risk %>"><%= assessment.reputational_risk %></span></div>
+                    <div class="col-6"><small class="text-muted">Strategic:</small> <span class="badge badge-<%= assessment.strategic_risk %>"><%= assessment.strategic_risk %></span></div>
+                  </div>
+                </div>
+              </div>
+              <% if (assessment.recommendation) { %>
+                <hr>
+                <strong>Recommendation:</strong> <%= assessment.recommendation %>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Security Questionnaire Summary -->
+        <% if (questionnaire) { %>
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-file-earmark-check me-2"></i>Security Questionnaire</span>
+              <small class="text-muted">Completed: <%= questionnaire.completed_date %></small>
+            </div>
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                  <div class="p-3 rounded" style="background: <%= questionnaire.questionnaire_score >= 80 ? '#dcfce7' : questionnaire.questionnaire_score >= 60 ? '#fef9c3' : '#fee2e2' %>;">
+                    <h2 class="mb-0" style="color: <%= questionnaire.questionnaire_score >= 80 ? '#16a34a' : questionnaire.questionnaire_score >= 60 ? '#ca8a04' : '#dc2626' %>;">
+                      <%= questionnaire.questionnaire_score %>%
+                    </h2>
+                    <small>Security Score</small>
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <div class="row g-2">
+                    <div class="col-4"><i class="bi bi-<%= questionnaire.has_mfa === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i> MFA</div>
+                    <div class="col-4"><i class="bi bi-<%= questionnaire.has_soc2 === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i> SOC 2</div>
+                    <div class="col-4"><i class="bi bi-<%= questionnaire.has_iso27001 === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i> ISO 27001</div>
+                    <div class="col-4"><i class="bi bi-<%= questionnaire.encryption_at_rest === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i> Encryption (Rest)</div>
+                    <div class="col-4"><i class="bi bi-<%= questionnaire.encryption_in_transit === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i> Encryption (Transit)</div>
+                    <div class="col-4"><i class="bi bi-<%= questionnaire.has_bcdr === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i> BC/DR Plan</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Issues -->
+        <% if (issues && issues.length > 0) { %>
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-exclamation-triangle me-2"></i>Open Issues (<%= issues.filter(i => i.status === 'open').length %>)</span>
+              <a href="/monitoring/new/<%= vendor.id %>" class="btn btn-sm btn-outline-primary">Add Issue</a>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Issue</th>
+                      <th>Severity</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% issues.slice(0, 5).forEach(issue => { %>
+                      <tr>
+                        <td><%= issue.title %></td>
+                        <td><span class="badge badge-<%= issue.severity %>"><%= issue.severity %></span></td>
+                        <td><span class="badge bg-<%= issue.status === 'open' ? 'danger' : issue.status === 'in_progress' ? 'warning' : 'success' %>"><%= issue.status %></span></td>
+                        <td><%= issue.due_date || '-' %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Offboarding Status -->
+        <% if (offboarding) { %>
+          <div class="card mb-4">
+            <div class="card-header bg-warning bg-opacity-10">
+              <i class="bi bi-box-arrow-right me-2"></i>Offboarding Status
+            </div>
+            <div class="card-body">
+              <p><strong>Reason:</strong> <%= offboarding.termination_reason %></p>
+              <p><strong>Target Date:</strong> <%= offboarding.termination_date %></p>
+              <hr>
+              <h6>Checklist Progress:</h6>
+              <form method="POST" action="/offboarding/<%= vendor.id %>/update">
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="access_revoked" value="yes" <%= offboarding.access_revoked === 'yes' ? 'checked' : '' %>>
+                      <label class="form-check-label">Access Revoked</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="data_returned" value="yes" <%= offboarding.data_returned === 'yes' ? 'checked' : '' %>>
+                      <label class="form-check-label">Data Returned</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="data_destroyed" value="yes" <%= offboarding.data_destroyed === 'yes' ? 'checked' : '' %>>
+                      <label class="form-check-label">Data Destroyed</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="assets_returned" value="yes" <%= offboarding.assets_returned === 'yes' ? 'checked' : '' %>>
+                      <label class="form-check-label">Assets Returned</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="final_payment" value="yes" <%= offboarding.final_payment === 'yes' ? 'checked' : '' %>>
+                      <label class="form-check-label">Final Payment Processed</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="destruction_certificate" value="yes" <%= offboarding.destruction_certificate === 'yes' ? 'checked' : '' %>>
+                      <label class="form-check-label">Destruction Certificate Received</label>
+                    </div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">
+                  <i class="bi bi-save me-2"></i>Update Offboarding Status
+                </button>
+              </form>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Assessment History Section -->
+    <div class="card mt-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history me-2"></i>Assessment History & Activity Log</span>
+        <a href="/reports/vendor/<%= vendor.id %>" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-download me-2"></i>Export Report
+        </a>
+      </div>
+      <div class="card-body">
+        <ul class="nav nav-tabs" id="historyTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">All Activity</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="assessments-tab" data-bs-toggle="tab" data-bs-target="#assessments" type="button">Risk Assessments (<%= history.assessments.length %>)</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="questionnaires-tab" data-bs-toggle="tab" data-bs-target="#questionnaires" type="button">Questionnaires (<%= history.questionnaires.length %>)</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="dpa-tab" data-bs-toggle="tab" data-bs-target="#dpa" type="button">Data Processing (<%= history.dataProcessing.length %>)</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="soc2-tab" data-bs-toggle="tab" data-bs-target="#soc2" type="button">SOC 2 Reviews (<%= history.soc2Reviews.length %>)</button>
+          </li>
+        </ul>
+        <div class="tab-content pt-3" id="historyTabContent">
+          <!-- All Activity Tab -->
+          <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <% if (activity && activity.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>Action</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% activity.forEach(act => { %>
+                      <tr>
+                        <td><%= new Date(act.created_at).toLocaleString() %></td>
+                        <td>
+                          <span class="badge bg-<%= act.action.includes('created') ? 'success' : act.action.includes('completed') ? 'primary' : 'secondary' %>">
+                            <%= act.action.replace(/_/g, ' ') %>
+                          </span>
+                        </td>
+                        <td><%= act.details || '-' %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-3">No activity recorded yet.</p>
+            <% } %>
+          </div>
+
+          <!-- Risk Assessments Tab -->
+          <div class="tab-pane fade" id="assessments" role="tabpanel">
+            <% if (history.assessments.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>Risk Tier</th>
+                      <th>Inherent Score</th>
+                      <th>Status</th>
+                      <th>Recommendation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% history.assessments.forEach(a => { %>
+                      <tr>
+                        <td><%= new Date(a.created_at).toLocaleDateString() %></td>
+                        <td><span class="badge badge-<%= a.risk_tier %>"><%= a.risk_tier ? a.risk_tier.toUpperCase() : 'N/A' %></span></td>
+                        <td><%= a.inherent_risk_score %>/24</td>
+                        <td><span class="badge bg-<%= a.status === 'completed' ? 'success' : 'warning' %>"><%= a.status %></span></td>
+                        <td><%= a.recommendation ? a.recommendation.substring(0, 50) + '...' : '-' %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-3">No risk assessments completed yet.</p>
+            <% } %>
+          </div>
+
+          <!-- Questionnaires Tab -->
+          <div class="tab-pane fade" id="questionnaires" role="tabpanel">
+            <% if (history.questionnaires.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>Security Score</th>
+                      <th>MFA</th>
+                      <th>SOC 2</th>
+                      <th>ISO 27001</th>
+                      <th>Encryption</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% history.questionnaires.forEach(q => { %>
+                      <tr>
+                        <td><%= q.completed_date || new Date(q.created_at).toLocaleDateString() %></td>
+                        <td>
+                          <span class="badge bg-<%= q.questionnaire_score >= 80 ? 'success' : q.questionnaire_score >= 60 ? 'warning' : 'danger' %>">
+                            <%= q.questionnaire_score %>%
+                          </span>
+                        </td>
+                        <td><i class="bi bi-<%= q.has_mfa === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i></td>
+                        <td><i class="bi bi-<%= q.has_soc2 === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i></td>
+                        <td><i class="bi bi-<%= q.has_iso27001 === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i></td>
+                        <td><i class="bi bi-<%= q.encryption_at_rest === 'yes' ? 'check-circle text-success' : 'x-circle text-danger' %>"></i></td>
+                        <td><span class="badge bg-<%= q.status === 'completed' ? 'success' : 'warning' %>"><%= q.status %></span></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-3">No security questionnaires completed yet.</p>
+            <% } %>
+          </div>
+
+          <!-- Data Processing Tab -->
+          <div class="tab-pane fade" id="dpa" role="tabpanel">
+            <% if (history.dataProcessing.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>Data Categories</th>
+                      <th>Legal Basis</th>
+                      <th>Cross-Border</th>
+                      <th>DPIA Required</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% history.dataProcessing.forEach(dp => { %>
+                      <tr>
+                        <td><%= new Date(dp.created_at).toLocaleDateString() %></td>
+                        <td><%= dp.data_categories ? dp.data_categories.substring(0, 30) + '...' : '-' %></td>
+                        <td><%= dp.legal_basis || '-' %></td>
+                        <td><%= dp.cross_border_transfers || '-' %></td>
+                        <td><%= dp.dpia_required || '-' %></td>
+                        <td><span class="badge bg-<%= dp.status === 'completed' ? 'success' : 'warning' %>"><%= dp.status %></span></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-3">No data processing assessments completed yet.</p>
+            <% } %>
+          </div>
+
+          <!-- SOC 2 Reviews Tab -->
+          <div class="tab-pane fade" id="soc2" role="tabpanel">
+            <% if (history.soc2Reviews.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Review Date</th>
+                      <th>Report Type</th>
+                      <th>Auditor</th>
+                      <th>Opinion</th>
+                      <th>Exceptions</th>
+                      <th>Overall</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% history.soc2Reviews.forEach(sr => { %>
+                      <tr>
+                        <td><%= sr.review_date || new Date(sr.created_at).toLocaleDateString() %></td>
+                        <td><%= sr.report_type || '-' %></td>
+                        <td><%= sr.auditor_firm || '-' %></td>
+                        <td><%= sr.opinion_type || '-' %></td>
+                        <td><%= sr.exceptions_noted || '-' %></td>
+                        <td>
+                          <span class="badge bg-<%= sr.overall_assessment === 'acceptable' ? 'success' : sr.overall_assessment === 'acceptable_with_reservations' ? 'warning' : 'danger' %>">
+                            <%= sr.overall_assessment ? sr.overall_assessment.replace(/_/g, ' ') : 'N/A' %>
+                          </span>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted text-center py-3">No SOC 2 reviews completed yet.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../partials/footer") %>
+</body>
+</html>

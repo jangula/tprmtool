@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TPRM Guidelines - TPRM Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --sidebar-width: 250px; }
+    body { min-height: 100vh; background-color: #f8fafc; }
+    .sidebar { width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto; padding-bottom: 60px; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-brand h4 { color: white; margin: 0; font-weight: 700; }
+    .sidebar-brand small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+    .sidebar-nav { padding: 1rem 0; }
+    .sidebar-nav .nav-link { color: rgba(255,255,255,0.7); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; text-decoration: none; }
+    .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+    .sidebar-section { padding: 0.5rem 1.5rem; color: rgba(255,255,255,0.4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+    .top-bar { background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem -2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .card-header { background: white; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+    .guideline-card { cursor: pointer; }
+    .guideline-card .card-body { padding: 1.5rem; }
+    .guideline-icon { font-size: 2.5rem; color: #1e3a5f; margin-bottom: 1rem; }
+    .hero-section { background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { active: 'guidelines' }) %>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div>
+        <h4 class="mb-0"><i class="bi bi-signpost-2 me-2"></i>TPRM Guidelines</h4>
+        <small class="text-muted">Step-by-step guides for third-party engagements</small>
+      </div>
+    </div>
+
+    <div class="hero-section">
+      <h2><i class="bi bi-question-circle me-2"></i>What do you want to do?</h2>
+      <p class="mb-0">Select the type of third-party engagement below to get a step-by-step guide on the TPRM process you need to follow.</p>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <a href="/guidelines/new_software" class="text-decoration-none">
+          <div class="card guideline-card h-100">
+            <div class="card-body text-center">
+              <div class="guideline-icon"><i class="bi bi-cloud-download"></i></div>
+              <h5 class="text-dark">Buy New Software / SaaS</h5>
+              <p class="text-muted mb-0">Purchasing new software applications or cloud-based services</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="/guidelines/software_extension" class="text-decoration-none">
+          <div class="card guideline-card h-100">
+            <div class="card-body text-center">
+              <div class="guideline-icon"><i class="bi bi-arrow-repeat"></i></div>
+              <h5 class="text-dark">Extend Software Contract</h5>
+              <p class="text-muted mb-0">Renewing or extending existing software vendor contracts</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="/guidelines/new_hardware" class="text-decoration-none">
+          <div class="card guideline-card h-100">
+            <div class="card-body text-center">
+              <div class="guideline-icon"><i class="bi bi-pc-display"></i></div>
+              <h5 class="text-dark">Buy New Hardware</h5>
+              <p class="text-muted mb-0">Purchasing hardware, equipment, or physical assets</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="/guidelines/bpo" class="text-decoration-none">
+          <div class="card guideline-card h-100">
+            <div class="card-body text-center">
+              <div class="guideline-icon"><i class="bi bi-diagram-3"></i></div>
+              <h5 class="text-dark">Business Process Outsourcing</h5>
+              <p class="text-muted mb-0">Outsourcing business processes to third parties</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="/guidelines/consulting" class="text-decoration-none">
+          <div class="card guideline-card h-100">
+            <div class="card-body text-center">
+              <div class="guideline-icon"><i class="bi bi-person-badge"></i></div>
+              <h5 class="text-dark">Engage Consultants</h5>
+              <p class="text-muted mb-0">Hiring consultants or professional service providers</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="/guidelines/data_processor" class="text-decoration-none">
+          <div class="card guideline-card h-100">
+            <div class="card-body text-center">
+              <div class="guideline-icon"><i class="bi bi-database-lock"></i></div>
+              <h5 class="text-dark">Engage Data Processor</h5>
+              <p class="text-muted mb-0">Engaging vendors who will process personal data</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        <i class="bi bi-info-circle me-2"></i>About TPRM Process
+      </div>
+      <div class="card-body">
+        <p>Third Party Risk Management (TPRM) is the process of identifying, assessing, and mitigating risks associated with engaging external vendors and service providers. Our TPRM process ensures that:</p>
+        <ul>
+          <li><strong>Security risks</strong> are identified and managed before engaging vendors</li>
+          <li><strong>Compliance requirements</strong> (GDPR, POPIA, PCI-DSS, etc.) are met</li>
+          <li><strong>Contractual protections</strong> are in place to safeguard the organization</li>
+          <li><strong>Ongoing monitoring</strong> ensures vendors maintain required standards</li>
+        </ul>
+        <p class="mb-0"><strong>Need help?</strong> Contact the TPRM team at <a href="mailto:tprm@company.com">tprm@company.com</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../partials/footer") %>
+</body>
+</html>
